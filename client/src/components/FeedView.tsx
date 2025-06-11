@@ -92,6 +92,59 @@ export default function FeedView() {
         </CardContent>
       </Card>
 
+      {/* Advanced Filters Panel */}
+      {showFilters && (
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="minMmi">Minimum MMI Count</Label>
+                <Input
+                  id="minMmi"
+                  type="number"
+                  placeholder="e.g., 2"
+                  value={minMmi}
+                  onChange={(e) => setMinMmi(e.target.value)}
+                  min="0"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="minReactions">Minimum Total Reactions</Label>
+                <Input
+                  id="minReactions"
+                  type="number"
+                  placeholder="e.g., 5"
+                  value={minReactions}
+                  onChange={(e) => setMinReactions(e.target.value)}
+                  min="0"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="fromDate">From Date</Label>
+                <Input
+                  id="fromDate"
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end mt-4 space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setMinMmi("");
+                  setMinReactions("");
+                  setFromDate("");
+                }}
+              >
+                Clear Filters
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Posts Feed */}
       {isLoading ? (
         <div className="space-y-6">
