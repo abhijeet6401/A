@@ -14,16 +14,20 @@ export default function FeedView() {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [minMmi, setMinMmi] = useState("");
+  const [minTbd, setMinTbd] = useState("");
+  const [minNews, setMinNews] = useState("");
   const [minReactions, setMinReactions] = useState("");
   const [fromDate, setFromDate] = useState("");
 
   const { data: posts, isLoading, refetch } = useQuery({
-    queryKey: ["/api/posts", selectedRegion, searchQuery, minMmi, minReactions, fromDate],
+    queryKey: ["/api/posts", selectedRegion, searchQuery, minMmi, minTbd, minNews, minReactions, fromDate],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (selectedRegion !== "all") params.append("region", selectedRegion);
       if (searchQuery) params.append("company", searchQuery);
       if (minMmi) params.append("minMmi", minMmi);
+      if (minTbd) params.append("minTbd", minTbd);
+      if (minNews) params.append("minNews", minNews);
       if (minReactions) params.append("minReactions", minReactions);
       if (fromDate) params.append("fromDate", fromDate);
       
@@ -47,34 +51,40 @@ export default function FeedView() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      {/* Filters and Search */}
+      {/* Regions */}
+      <Card className="mb-4">
+        <CardContent className="p-4">
+          <div className="flex space-x-2">
+            {regions.map((region) => (
+              <Button
+                key={region.value}
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedRegion(region.value)}
+                className={`region-filter ${selectedRegion === region.value ? "active" : ""}`}
+              >
+                {region.label}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Search and Actions */}
       <Card className="mb-6">
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex space-x-2">
-              {regions.map((region) => (
-                <Button
-                  key={region.value}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedRegion(region.value)}
-                  className={`region-filter ${selectedRegion === region.value ? "active" : ""}`}
-                >
-                  {region.label}
-                </Button>
-              ))}
+          <div className="flex items-center justify-between gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search by company..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
             
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by company..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-64"
-                />
-              </div>
               <Button 
                 variant="outline" 
                 onClick={() => setShowFilters(!showFilters)}
@@ -96,7 +106,7 @@ export default function FeedView() {
       {showFilters && (
         <Card className="mb-6">
           <CardContent className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="minMmi">Minimum MMI Count</Label>
                 <Input
@@ -105,6 +115,28 @@ export default function FeedView() {
                   placeholder="e.g., 2"
                   value={minMmi}
                   onChange={(e) => setMinMmi(e.target.value)}
+                  min="0"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="minTbd">Minimum TBD Count</Label>
+                <Input
+                  id="minTbd"
+                  type="number"
+                  placeholder="e.g., 1"
+                  value={minTbd}
+                  onChange={(e) => setMinTbd(e.target.value)}
+                  min="0"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="minNews">Minimum NEWS Count</Label>
+                <Input
+                  id="minNews"
+                  type="number"
+                  placeholder="e.g., 1"
+                  value={minNews}
+                  onChange={(e) => setMinNews(e.target.value)}
                   min="0"
                 />
               </div>
@@ -134,6 +166,8 @@ export default function FeedView() {
                 variant="outline" 
                 onClick={() => {
                   setMinMmi("");
+                  setMinTbd("");
+                  setMinNews("");
                   setMinReactions("");
                   setFromDate("");
                 }}

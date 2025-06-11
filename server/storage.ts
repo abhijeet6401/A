@@ -28,7 +28,7 @@ export interface IStorage {
 
   // Post operations
   createPost(post: InsertPost & { authorId: number }): Promise<Post>;
-  getPosts(region?: string, filters?: { minMmi?: number; minReactions?: number; fromDate?: Date }): Promise<PostWithDetails[]>;
+  getPosts(region?: string, filters?: { minMmi?: number; minTbd?: number; minNews?: number; minReactions?: number; fromDate?: Date }): Promise<PostWithDetails[]>;
   getPostsByCompany(company: string): Promise<PostWithDetails[]>;
   getPostsByUser(userId: number): Promise<PostWithDetails[]>;
   getPost(id: number): Promise<PostWithDetails | undefined>;
@@ -128,7 +128,7 @@ export class MemStorage implements IStorage {
     return post;
   }
 
-  async getPosts(region?: string, filters?: { minMmi?: number; minReactions?: number; fromDate?: Date }): Promise<PostWithDetails[]> {
+  async getPosts(region?: string, filters?: { minMmi?: number; minTbd?: number; minNews?: number; minReactions?: number; fromDate?: Date }): Promise<PostWithDetails[]> {
     let posts = Array.from(this.posts.values());
     
     if (region && region !== 'all') {
@@ -142,18 +142,30 @@ export class MemStorage implements IStorage {
     
     const enrichedPosts = await this.enrichPostsWithDetails(posts);
     
+    let filteredPosts = enrichedPosts;
+    
     // Apply MMI count filter
     if (filters?.minMmi !== undefined) {
-      return enrichedPosts.filter(post => post.reactionCounts.mmi >= filters.minMmi!);
+      filteredPosts = filteredPosts.filter(post => post.reactionCounts.mmi >= filters.minMmi!);
+    }
+    
+    // Apply TBD count filter
+    if (filters?.minTbd !== undefined) {
+      filteredPosts = filteredPosts.filter(post => post.reactionCounts.tbd >= filters.minTbd!);
+    }
+    
+    // Apply NEWS count filter
+    if (filters?.minNews !== undefined) {
+      filteredPosts = filteredPosts.filter(post => post.reactionCounts.news >= filters.minNews!);
     }
     
     // Apply total reactions filter
     if (filters?.minReactions !== undefined) {
       const totalReactions = (post: any) => post.reactionCounts.mmi + post.reactionCounts.tbd + post.reactionCounts.news;
-      return enrichedPosts.filter(post => totalReactions(post) >= filters.minReactions!);
+      filteredPosts = filteredPosts.filter(post => totalReactions(post) >= filters.minReactions!);
     }
     
-    return enrichedPosts;
+    return filteredPosts;
   }
 
   async getPostsByCompany(company: string): Promise<PostWithDetails[]> {

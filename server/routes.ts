@@ -162,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/posts", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const { region, company, minMmi, minReactions, fromDate } = req.query;
+      const { region, company, minMmi, minTbd, minNews, minReactions, fromDate } = req.query;
       
       let posts;
       if (company) {
@@ -170,6 +170,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         const filters = {
           minMmi: minMmi ? parseInt(minMmi as string) : undefined,
+          minTbd: minTbd ? parseInt(minTbd as string) : undefined,
+          minNews: minNews ? parseInt(minNews as string) : undefined,
           minReactions: minReactions ? parseInt(minReactions as string) : undefined,
           fromDate: fromDate ? new Date(fromDate as string) : undefined
         };
