@@ -20,6 +20,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
+import EditPostModal from "./EditPostModal";
 
 interface PostCardProps {
   post: any;
@@ -326,6 +327,16 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
             </div>
           </div>
         )}
+
+        <EditPostModal
+          open={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onSuccess={() => {
+            setShowEditModal(false);
+            onUpdate();
+          }}
+          post={post}
+        />
       </CardContent>
     </Card>
   );

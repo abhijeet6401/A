@@ -196,6 +196,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/posts/:postId", authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const postId = parseInt(req.params.postId);
+      const updateData = {
+        headline: req.body.headline,
+        content: req.body.content,
+        company: req.body.company,
+        region: req.body.region
+      };
+      
+      const updatedPost = await storage.updatePost(postId, updateData);
+      res.json(updatedPost);
+    } catch (error) {
+      console.error("Error updating post:", error);
+      res.status(500).json({ message: "Failed to update post" });
+    }
+  });
+
   // Reaction routes
   app.post("/api/posts/:postId/reactions", authenticateToken, async (req: AuthRequest, res) => {
     try {

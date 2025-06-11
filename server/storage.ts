@@ -32,6 +32,7 @@ export interface IStorage {
   getPostsByCompany(company: string): Promise<PostWithDetails[]>;
   getPostsByUser(userId: number): Promise<PostWithDetails[]>;
   getPost(id: number): Promise<PostWithDetails | undefined>;
+  updatePost(id: number, updateData: Partial<InsertPost>): Promise<Post>;
 
   // Reaction operations
   addReaction(reaction: InsertReaction & { userId: number; postId: number }): Promise<Reaction>;
@@ -188,6 +189,23 @@ export class MemStorage implements IStorage {
     
     const enriched = await this.enrichPostsWithDetails([post]);
     return enriched[0];
+  }
+
+  async updatePost(id: number, updateData: Partial<InsertPost>): Promise<Post> {
+    const existingPost = this.posts.get(id);
+    if (!existingPost) {
+      throw new Error("Post not found");
+    }
+
+    const updatedPost: Post = {
+      ...existingPost,
+      ...updateData,
+      id,
+      createdAt: existingPost.createdAt,
+    };
+
+    this.posts.set(id, updatedPost);
+    return updatedPost;
   }
 
   private async enrichPostsWithDetails(posts: Post[]): Promise<PostWithDetails[]> {
