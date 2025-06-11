@@ -15,10 +15,11 @@ import {
   FileText,
   Heart
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 
 interface PostCardProps {
   post: any;
@@ -28,8 +29,10 @@ interface PostCardProps {
 export default function PostCard({ post, onUpdate }: PostCardProps) {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const [showEditModal, setShowEditModal] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const [, navigate] = useLocation();
 
   const addReactionMutation = useMutation({
     mutationFn: async ({ type }: { type: string }) => {
@@ -88,8 +91,34 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
     },
   });
 
+  const removeReactionMutation = useMutation({
+    mutationFn: async (type: string) => {
+      const response = await apiRequest("DELETE", `/api/posts/${post.id}/reactions/${type}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      onUpdate();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleReaction = (type: string) => {
-    addReactionMutation.mutate({ type });
+    // Check if user already reacted with this type
+    const userReaction = post.reactions?.find((r: any) => r.userId === user?.id && r.type === type);
+    
+    if (userReaction) {
+      // Remove reaction
+      removeReactionMutation.mutate(type);
+    } else {
+      // Add reaction
+      addReactionMutation.mutate({ type });
+    }
   };
 
   const handleComment = () => {
@@ -135,7 +164,10 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               </AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="font-medium text-gray-900">
+              <h3 
+                className="font-medium text-gray-900 hover:text-blue-600 cursor-pointer"
+                onClick={() => navigate(`/profile/${post.author.id}`)}
+              >
                 {post.author.firstName} {post.author.lastName}
               </h3>
               <div className="flex items-center space-x-2 text-sm text-gray-500">
@@ -144,11 +176,11 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                 </Badge>
                 <span>{post.company}</span>
                 <span>•</span>
-                <span>{formatDistanceToNow(new Date(post.createdAt))} ago</span>
+                <span>{format(new Date(post.createdAt), "dd/MM/yyyy, HH:mm")} IST</span>
               </div>
             </div>
           </div>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={() => setShowEditModal(true)}>
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </div>
@@ -182,7 +214,10 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               variant="ghost"
               size="sm"
               onClick={() => handleReaction("mmi")}
-              className="flex items-center space-x-1 text-sm hover:text-orange-600"
+              className={`flex items-center space-x-1 text-sm hover:text-orange-600 ${
+                post.reactions?.find((r: any) => r.userId === user?.id && r.type === "mmi") 
+                  ? "text-orange-600 bg-orange-50" : ""
+              }`}
             >
               <Lightbulb className="h-4 w-4" />
               <span>MMI ({post.reactionCounts.mmi})</span>
@@ -192,7 +227,10 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               variant="ghost"
               size="sm"
               onClick={() => handleReaction("tbd")}
-              className="flex items-center space-x-1 text-sm hover:text-yellow-600"
+              className={`flex items-center space-x-1 text-sm hover:text-yellow-600 ${
+                post.reactions?.find((r: any) => r.userId === user?.id && r.type === "tbd") 
+                  ? "text-yellow-600 bg-yellow-50" : ""
+              }`}
             >
               <HelpCircle className="h-4 w-4" />
               <span>TBD ({post.reactionCounts.tbd})</span>
@@ -202,7 +240,10 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
               variant="ghost"
               size="sm"
               onClick={() => handleReaction("news")}
-              className="flex items-center space-x-1 text-sm hover:text-green-600"
+              className={`flex items-center space-x-1 text-sm hover:text-green-600 ${
+                post.reactions?.find((r: any) => r.userId === user?.id && r.type === "news") 
+                  ? "text-green-600 bg-green-50" : ""
+              }`}
             >
               <Newspaper className="h-4 w-4" />
               <span>NEWS ({post.reactionCounts.news})</span>
@@ -254,7 +295,7 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                           {comment.author.firstName} {comment.author.lastName}
                         </span>
                         <span className="text-xs text-gray-500">
-                          {formatDistanceToNow(new Date(comment.createdAt))} ago
+                          {format(new Date(comment.createdAt), "dd/MM/yyyy, HH:mm")} IST
                         </span>
                       </div>
                       <p className="text-sm text-gray-700">{comment.content}</p>
