@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { setAuthToken } from "@/lib/authUtils";
 
 const loginSchema = z.object({
@@ -56,13 +56,18 @@ export default function Login() {
       const response = await apiRequest("POST", "/api/auth/login", data);
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setAuthToken(data.token);
+      await queryClient.invalidateQueries();
+      await queryClient.refetchQueries();
       toast({
         title: "Success",
         description: "Logged in successfully",
       });
-      window.location.reload();
+      // Small delay to ensure queries are refetched
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     },
     onError: (error) => {
       toast({
@@ -78,13 +83,18 @@ export default function Login() {
       const response = await apiRequest("POST", "/api/auth/register", data);
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       setAuthToken(data.token);
+      await queryClient.invalidateQueries();
+      await queryClient.refetchQueries();
       toast({
         title: "Success",
         description: "Account created successfully",
       });
-      window.location.reload();
+      // Small delay to ensure queries are refetched
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     },
     onError: (error) => {
       toast({

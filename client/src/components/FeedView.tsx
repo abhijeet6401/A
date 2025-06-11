@@ -19,7 +19,12 @@ export default function FeedView() {
       if (selectedRegion !== "all") params.append("region", selectedRegion);
       if (searchQuery) params.append("company", searchQuery);
       
-      const response = await fetch(`/api/posts?${params}`);
+      const url = `/api/posts${params.toString() ? `?${params}` : ''}`;
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      });
       if (!response.ok) throw new Error("Failed to fetch posts");
       return response.json();
     },
