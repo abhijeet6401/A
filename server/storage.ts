@@ -28,18 +28,18 @@ export interface IStorage {
 
   // Post operations
   createPost(post: InsertPost & { authorId: number }): Promise<Post>;
-  getPosts(region?: string): Promise<PostWithDetails[]>;
+  getPosts(region?: string, filters?: { minMmi?: number; minReactions?: number; fromDate?: Date }): Promise<PostWithDetails[]>;
   getPostsByCompany(company: string): Promise<PostWithDetails[]>;
   getPostsByUser(userId: number): Promise<PostWithDetails[]>;
   getPost(id: number): Promise<PostWithDetails | undefined>;
 
   // Reaction operations
-  addReaction(reaction: InsertReaction & { userId: number }): Promise<Reaction>;
+  addReaction(reaction: InsertReaction & { userId: number; postId: number }): Promise<Reaction>;
   removeReaction(postId: number, userId: number, type: string): Promise<boolean>;
   getReactionsByPost(postId: number): Promise<Reaction[]>;
 
   // Comment operations
-  addComment(comment: InsertComment & { userId: number }): Promise<Comment>;
+  addComment(comment: InsertComment & { userId: number; postId: number }): Promise<Comment>;
   getCommentsByPost(postId: number): Promise<(Comment & { author: User })[]>;
 
   // Fund Manager operations
@@ -103,6 +103,8 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id,
+      firstName: insertUser.firstName || null,
+      lastName: insertUser.lastName || null,
       createdAt: new Date(),
     };
     this.users.set(id, user);
@@ -112,8 +114,14 @@ export class MemStorage implements IStorage {
   async createPost(postData: InsertPost & { authorId: number }): Promise<Post> {
     const id = this.currentPostId++;
     const post: Post = {
-      ...postData,
       id,
+      authorId: postData.authorId,
+      company: postData.company,
+      region: postData.region,
+      content: postData.content,
+      headline: postData.headline,
+      summary: postData.summary,
+      attachments: postData.attachments || null,
       createdAt: new Date(),
     };
     this.posts.set(id, post);
@@ -207,7 +215,7 @@ export class MemStorage implements IStorage {
       .filter(reaction => reaction.postId === postId);
   }
 
-  async addComment(commentData: InsertComment & { userId: number }): Promise<Comment> {
+  async addComment(commentData: InsertComment & { userId: number; postId: number }): Promise<Comment> {
     const id = this.currentCommentId++;
     const comment: Comment = {
       ...commentData,
@@ -351,22 +359,22 @@ export class MemStorage implements IStorage {
     });
 
     // Add reactions
-    await this.addReaction({ postId: post1.id, type: "mmi", userId: analyst2.id });
-    await this.addReaction({ postId: post1.id, type: "news", userId: analyst3.id });
-    await this.addReaction({ postId: post2.id, type: "mmi", userId: analyst1.id });
-    await this.addReaction({ postId: post3.id, type: "tbd", userId: analyst1.id });
+    await this.addReaction({ type: "mmi", postId: post1.id, userId: analyst2.id });
+    await this.addReaction({ type: "news", postId: post1.id, userId: analyst3.id });
+    await this.addReaction({ type: "mmi", postId: post2.id, userId: analyst1.id });
+    await this.addReaction({ type: "tbd", postId: post3.id, userId: analyst1.id });
 
     // Add comments
     await this.addComment({
+      content: "Excellent analysis! The retail growth numbers are particularly impressive.",
       postId: post1.id,
       userId: analyst2.id,
-      content: "Excellent analysis! The retail growth numbers are particularly impressive.",
     });
 
     await this.addComment({
+      content: "This investment shows Samsung's commitment to competing with TSMC.",
       postId: post2.id,
       userId: analyst1.id,
-      content: "This investment shows Samsung's commitment to competing with TSMC.",
     });
 
     // Add fund manager like
