@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function ProfileView() {
@@ -113,7 +113,7 @@ export default function ProfileView() {
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="font-medium text-gray-900">{post.headline}</h3>
                         <span className="text-sm text-gray-500">
-                          {formatDistanceToNow(new Date(post.createdAt))} ago
+                          {format(new Date(post.createdAt), "dd/MM/yyyy, HH:mm")} IST
                         </span>
                       </div>
                       <div className="flex items-center space-x-4 text-sm text-gray-600">
