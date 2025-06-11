@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Plus } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Search, Plus, Filter } from "lucide-react";
 import PostCard from "./PostCard";
 import CreatePostModal from "./CreatePostModal";
 
@@ -11,13 +12,20 @@ export default function FeedView() {
   const [selectedRegion, setSelectedRegion] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [minMmi, setMinMmi] = useState("");
+  const [minReactions, setMinReactions] = useState("");
+  const [fromDate, setFromDate] = useState("");
 
   const { data: posts, isLoading, refetch } = useQuery({
-    queryKey: ["/api/posts", selectedRegion, searchQuery],
+    queryKey: ["/api/posts", selectedRegion, searchQuery, minMmi, minReactions, fromDate],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (selectedRegion !== "all") params.append("region", selectedRegion);
       if (searchQuery) params.append("company", searchQuery);
+      if (minMmi) params.append("minMmi", minMmi);
+      if (minReactions) params.append("minReactions", minReactions);
+      if (fromDate) params.append("fromDate", fromDate);
       
       const url = `/api/posts${params.toString() ? `?${params}` : ''}`;
       const response = await fetch(url, {
@@ -67,6 +75,14 @@ export default function FeedView() {
                   className="pl-10 w-64"
                 />
               </div>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center space-x-2"
+              >
+                <Filter className="w-4 h-4" />
+                <span>Filters</span>
+              </Button>
               <Button onClick={() => setShowCreatePost(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Post

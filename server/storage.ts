@@ -128,13 +128,32 @@ export class MemStorage implements IStorage {
     return post;
   }
 
-  async getPosts(region?: string): Promise<PostWithDetails[]> {
-    const allPosts = Array.from(this.posts.values());
-    const filteredPosts = region && region !== 'all' 
-      ? allPosts.filter(post => post.region === region)
-      : allPosts;
+  async getPosts(region?: string, filters?: { minMmi?: number; minReactions?: number; fromDate?: Date }): Promise<PostWithDetails[]> {
+    let posts = Array.from(this.posts.values());
     
-    return this.enrichPostsWithDetails(filteredPosts);
+    if (region && region !== 'all') {
+      posts = posts.filter(post => post.region === region);
+    }
+    
+    // Apply date filter
+    if (filters?.fromDate) {
+      posts = posts.filter(post => post.createdAt && post.createdAt >= filters.fromDate!);
+    }
+    
+    const enrichedPosts = await this.enrichPostsWithDetails(posts);
+    
+    // Apply MMI count filter
+    if (filters?.minMmi !== undefined) {
+      return enrichedPosts.filter(post => post.reactionCounts.mmi >= filters.minMmi!);
+    }
+    
+    // Apply total reactions filter
+    if (filters?.minReactions !== undefined) {
+      const totalReactions = (post: any) => post.reactionCounts.mmi + post.reactionCounts.tbd + post.reactionCounts.news;
+      return enrichedPosts.filter(post => totalReactions(post) >= filters.minReactions!);
+    }
+    
+    return enrichedPosts;
   }
 
   async getPostsByCompany(company: string): Promise<PostWithDetails[]> {

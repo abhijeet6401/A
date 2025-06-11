@@ -10,7 +10,6 @@ import {
   HelpCircle, 
   Newspaper, 
   MessageCircle, 
-  Share, 
   Download,
   MoreHorizontal,
   FileText,
@@ -234,11 +233,6 @@ export default function PostCard({ post, onUpdate }: PostCardProps) {
                 <span>Like</span>
               </Button>
             )}
-            
-            <Button variant="ghost" size="sm" className="flex items-center space-x-1 text-sm">
-              <Share className="h-4 w-4" />
-              <span>Share</span>
-            </Button>
           </div>
         </div>
         

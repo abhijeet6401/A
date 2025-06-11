@@ -162,13 +162,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/posts", authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const { region, company } = req.query;
+      const { region, company, minMmi, minReactions, fromDate } = req.query;
       
       let posts;
       if (company) {
         posts = await storage.getPostsByCompany(company as string);
       } else {
-        posts = await storage.getPosts(region as string);
+        const filters = {
+          minMmi: minMmi ? parseInt(minMmi as string) : undefined,
+          minReactions: minReactions ? parseInt(minReactions as string) : undefined,
+          fromDate: fromDate ? new Date(fromDate as string) : undefined
+        };
+        posts = await storage.getPosts(region as string, filters);
       }
 
       res.json(posts);
