@@ -177,7 +177,7 @@ export class MemStorage implements IStorage {
     }));
   }
 
-  async addReaction(reactionData: InsertReaction & { userId: number }): Promise<Reaction> {
+  async addReaction(reactionData: InsertReaction & { userId: number; postId: number }): Promise<Reaction> {
     // Remove existing reaction of same type from same user
     await this.removeReaction(reactionData.postId, reactionData.userId, reactionData.type);
     

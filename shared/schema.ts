@@ -73,12 +73,14 @@ export const insertPostSchema = createInsertSchema(posts).omit({
 
 export const insertReactionSchema = createInsertSchema(reactions).omit({
   id: true,
+  postId: true,
   userId: true,
   createdAt: true,
 });
 
 export const insertCommentSchema = createInsertSchema(comments).omit({
   id: true,
+  postId: true,
   userId: true,
   createdAt: true,
 });
