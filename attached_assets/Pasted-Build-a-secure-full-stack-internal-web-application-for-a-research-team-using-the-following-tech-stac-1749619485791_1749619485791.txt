@@ -1,0 +1,77 @@
+Build a secure full-stack internal web application for a research team using the following tech stack:
+•	Frontend: Next.js (React)
+•	Backend: Node.js with Express.js
+•	Database: PostgreSQL
+•	Authentication: Role-based using JWT (two roles: Analyst and Fund Manager)
+•	File Storage: Cloudinary or AWS S3-compatible logic (to store PDFs, images, Excel files)
+•	AI Summary: Create a backend API route /api/summarize that takes input text/link and returns:
+o	a short headline (15–20 words) with numbers if available
+o	a summary paragraph
+o	Use a placeholder function for now (summarize(text)) that can later be connected to OpenAI
+🧩 Core Features to Build:
+1.	User Roles & Auth
+•	Allow users to sign up/login as Analyst or Fund Manager
+•	Use JWT-based authentication
+•	Fund Manager dashboard must be private and access-protected
+2.	Post Creation by Analysts
+•	Analyst can create a post by uploading:
+o	Text
+o	Image
+o	PDF or Excel file
+•	Analyst selects region: India, Asia, or Developed Markets
+•	Enter company name the post relates to
+•	Call /api/summarize to generate AI headline and summary
+•	Analyst can preview and edit AI-generated text before submitting
+3.	Feed Page
+•	Show a feed of all posts with filters for each region
+•	Each post includes:
+o	Headline
+o	Summary
+o	Attached file(s)
+o	Region, date, and author
+o	Reaction tags:
+	MMI (Money Making Idea)
+	TBD (To Be Discussed)
+	NEWS (Newsletter Material)
+o	Reaction counts + comment section below each post
+•	Feed page should have toggle buttons to switch between 3 regions
+4.	Sticky Top Navigation Bar
+Add 4 buttons on the top nav:
+•	Feed: Main region-based feed page
+•	Interviews: View summaries + links of management interviews (e.g., CNBC)
+•	Fund Manager Page (private): Only accessible to Fund Managers
+•	Profile: Employee’s own profile with post history, role, and region
+5.	Fund Manager Page
+•	Layout same as feed, but no regions, just a single stream
+•	If a Fund Manager likes a post on the main feed, it gets pushed to this private view
+6.	Interview Summary Page
+•	Analysts can upload management interview summaries and links (e.g., CNBC)
+•	Display them in a simple, read-only page
+7.	Company Search
+•	Every post must be tagged with a company name
+•	Add a search bar on the feed to search by company name
+•	On search, return all posts related to that company, with:
+o	Headline
+o	Region
+o	Date
+o	Summary
+🧱 Code Quality & Structure
+•	Use the MVC pattern:
+o	/models → DB schemas
+o	/routes → Express routes
+o	/controllers → Logic for each feature
+o	/middleware → Auth/role checking
+o	/utils → File upload, summarization helpers
+•	Use .env for secrets (JWT key, DB creds, Cloudinary keys)
+•	Code should be clean, commented, modular
+🧪 Seed Sample Data
+•	3 analysts, 1 fund manager
+•	3 sample posts (each from a different region)
+•	2 comments and 2 reactions per post
+•	1 dummy interview entry
+•	1 company with multiple posts (e.g., "Reliance")
+🧑‍💼 Deployment Setup
+•	Frontend ready to deploy to Vercel
+•	Backend ready for Render or Railway
+•	Use .env.example to show required environment variables
+
